@@ -85,12 +85,27 @@
         detailed renders. </p>
 
     <p>
-      We also did some primary research into how light behaves through refraction and reflection.
-      <img src="./images/lightbehavior.png" align="middle" width="400px"/>
+      We also did some preliminary research into how light behaves through refraction and reflection. A Fresnel term/equation tells us how 
+      much light is reflected and refracted when it crosses a border between different media, namely between water and air. We can apply 
+      the Freshenl term to find reflection and refraction textures. A diagram of this behavior is shown below, along with the equation to 
+      calculate the Fresnel term:
     </p>
 
-    <p>This is also somewhat behind schedule as we had hoped to implement rudimentary refraction and reflection algorithms.
-    As such we may have to adjust our goals so that our simulation of water is less dynamic than we'd hoped. We are also limited by
+    <div>
+      <table>
+        <tr>
+          <td>
+            <img src="./images/lightbehavior.png" align="middle" width="400px"/>
+          </td>
+          <td>
+            <img src="./images/fresnel.png" align="middle" width="400px"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>This is also somewhat behind schedule as we had hoped to implement rudimentary refraction and reflection algorithms by this point.
+    As such, we have adjusted our goals so that our simulation of water is less dynamic than we'd hoped. We are also limited by
         the hardware limitations associated with rendering water in real time, meaning our renders may be less detailed than originally intended. </p>
 
 
