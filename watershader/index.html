@@ -1,1 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    background-color: white;
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+  kbd {
+    color: #121212;
+  }
+</style>
+<title>CS 184 Mesh Edit</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
 
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2024</h1>
+<h1 align="middle">Final: WaterShader</h1>
+<h2 align="middle">Aayush Patel</h2>
+
+
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview/Summary</h2>
+<p>
+    The aim of our project is to develop new shaders for Minecraft which allows for a more realistic gaming experience.
+    In particular, we are trying to make water look more realistic with regards to color shifting at depth, refraction,
+    and reflection. In general we aim to make water in minecraft more dynamic.
+</p>
+<br>
+
+<h3 align="middle">Progress</h3>
+    So far we have decided to use a minecraft clone for easier interfacing with new textures and shaders.
+    The github page is linked <a href="https://github.com/fogleman/Craft?tab=readme-ov-file">here</a>. We have also poked
+    through the code to get a better understanding of how the clone handles light, shadows, and adjusts color and shade accordingly.
+    To that end we have developed a few preliminary shaders by adjusting the default png textures.
+
+    <div align="middle">
+        <table style="width=100%">
+            <tr>
+                <td>
+                    <img src="images/texture3.png" align="middle" width="400px"/>
+                    <figcaption align="middle">Water textures with rudimentary attempts at handling transparency</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    While this is far from what we hope the final product will be, we have a better understanding of how the program handles
+    connected blocks, blending, vanishing points, transparency, and reflection. From here we can begin to move forward towards more
+    detailed renders.
+
+    This is also somewhat behind schedule as we had hoped to implement rudimentary refraction and reflection algorithms.
+    As such we may have to adjust our goals so that our simulation of water is less dynamic than we'd hoped. We are also limited by
+    the hardware limitations associated with rendering water in real time, meaning our renders may be less detailed than originally intended.
+
+
+    Here is our updated schedule with the above in mind:
+
+    <h4 align="middle"> Schedule</h4>
+    <p>Sunday, April 14<p>
+    <p>- Look into Optifine<p>
+    Read notes on water implementation in various games
+
+    Tuesday, April 16 [Milestone]
+    Have some basic light shaders to show how light bounces off water surfaces
+
+    Friday, April 19
+    Apply feedback that we got
+    Work on vertex displacement for bigger waves
+    Improve reflection/refraction model
+
+    Tuesday, April 23
+    Keep working on reflection/refraction model
+    Improve coloring accuracy
+
+    Friday, April 26
+    Improve speed and efficiency of our program
+
+    Monday, April 29
+    Record video + write report with one buffer day
+
+
+
+    <h3 align="middle"></h3>
+
+
+<b>
+</b>
+<p>
+</p>
+<br>
+
+
+<b>
+</b>
+<p>
+</p>
+<!-- Example of including a single figure -->
+<!--<div align="middle">-->
+<!--  <img src="images/your_file.png" align="middle" width="50%">-->
+<!--</div>-->
+<!--<br>-->
+
+<!-- Example of including multiple figures -->
+
+<h3 align="middle">Progress</h3>
+
+
+
+<h3 align="middle">Work Plan</h3>
+
+<h3 align="middle"></h3>
+
+
+</body>
+</html>
