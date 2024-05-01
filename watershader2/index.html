@@ -42,7 +42,7 @@
 
 <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2024</h1>
 <h1 align="middle">Final: WaterShader</h1>
-<h2 align="middle">Aayush Patel, Angela Zhang, Dante Hays, Jaewon Oh</h2>
+<h2 align="middle">Dante Hays, Aayush Patel, Angela Zhang, Jaewon Oh</h2>
 
 
 
@@ -55,10 +55,9 @@
   The aim of our project is to develop new shaders for Minecraft which allows for a more realistic gaming experience in terms of 
   how water is presented to the player. In particular, we are trying to make water look more realistic with regards to color shifting 
   at various positions of the player, refraction, and reflection. Our project aims to understand how light rays work within the Minecraft 
-  world and to use those rays’s incoming angles to the surface normal to implement air-water refraction using the Fresnel equation. Then, we 
-  would also implement the reflection property of water by its ability to reflect the sky and surrounding objects in the Minecraft world. 
+  world and to use those rays’s incoming angles to the surface normal to implement air-water refraction and reflection using the Fresnel equation.
   Lastly, we are hoping to make the water more dynamic and showcase some properties of flow or movement. This entire project puts into practice 
-  the concepts we learned in class about shaders (including Blinn-Phong), ray tracing (to mimic reflection), and texture mapping.
+  the concepts we learned in class about shaders, ray tracing (to mimic reflection), and texture mapping.
 </p>
 <br>
 
@@ -72,13 +71,13 @@
 
     <p>
       However, another problem soon emerged and we realized that the code itself in the clone was all written in C, so allocation, creation of pointers, 
-      and function declarations were all novel to us. The clone’s GitHub also contained no comments or documentation, so there was a steep learning curve 
+      and function declarations were all novel to us (especially when implementing depth order sorting in the semi transparent data buffer). The clone’s GitHub also contained no comments or documentation, so there was a steep learning curve 
       for us in terms of self-learning the implementation of the Minecraft world in Craft. This was done through scavenging through GLSL files and the other
-      compilation files of the API.
+      compilation files of the original code.
     </p>
 
     <p>
-      Next, we realized that this clone does not come with water blocks, meaning that the default properties of water must be implemented from scratch by us 
+      Next, we realized that this clone does not come with water blocks, meaning that the default properties of water had to be implemented from scratch by us 
       first, before we were able to do further refraction or reflection properties. From here, we decided we realistically needed to limit the scope of our 
       project and focus on creating our own textured block in Craft, give it transparency, and then add some refraction and reflective properties as the last step.
     </p>
@@ -86,12 +85,50 @@
     <h4 align="middle">Implementing water semi-transparency</h4>
 
     <p>
+      Our initial approach to transparency attempted to use the built textures in the way glass implemented. Glass was "transparent" in this world because 
+      the pixels within its bounds simply don't render. We attempted to do the same, but this only resulted in swiss cheese like water as seen below
+
+      <div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="./images/firstwaterpic.png" align="middle" width="400px"/>
+        <figcaption>initial attempts at transparency</figcaption>
+      </td>
+      <td>
+        <img src="./images/texture3.png" align="middle" width="400px"/>
+        <figcaption>Texture we modified to get this effect, notice the spotty blue blocks near the bottom right/figcaption>
+      </td>
+    </tr>
+    </table>
+</div>
+<br>
+      From here we realized that we must use our understanding of OpenGl to adjust shaders accordingly. As such we adjusted the block fragment shaders
+  to lower the alpha value. While some blocks were transparent, this led to a new issue where some blocks behind the transparent blocks simply wouldn't render. 
+  This is because the camera thinks that we can't "see" them. 
+
+  In order to resolve this, we had to dig into the order in which glsl renders chunks. Currently, it was generating the transparent blocks before the blocks behind it, which meant that they 
+  blocks behind are not visible to the player due to the block in front occluding it. As such, we had to adjust the code to render transparent blocks last, so that the blocks behind it are fully rendered
+
+
+    <table style="width:100%">
+        <tr align="center">
+            <td>
+                <img src="./images/73563902722__1F87A15E-B20E-4EAC-9443-BBF96071DE42.png" align="middle" width="400px"/>
+                <figcaption>There are empty blocks behind the water block, as is seen here. They are not rendered when they should be</figcaption>
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%">
+
+
       When tackling how to implement the semi-transparency of our water block, we needed to modify both the world data generation and the entire graphics 
-      rendering pipeline. This task deemed to be much more complex and challenging than we thought, as it required creating separate buffers—one for opaque 
+      rendering pipeline. 
+      This task deemed to be much more complex and challenging than we thought, as it required creating separate buffers—one for opaque 
       blocks and one for semi-transparent blocks—and a sorting algorithm to sort semi-transparent objects in depth from farther to nearest distance from the 
-      camera (the player’s view). Finally, we also had to render all the opaque blocks before our water blocks, while enabling the blending for the water. This 
-      process resulted in a lot of debugging, especially with segmentation faults that came from our sorting algorithm, which consumed a large portion of our 
-      development timeline and pushed us behind schedule a bit.
+      camera (the player’s view).
+      This process resulted in a lot of debugging, especially with segmentation faults that came from our sorting algorithm, which consumed a large portion of our 
+      development timeline and pushed us behind schedule a bit. In general much of our time was spent digging through this poorly documented to understand how it worked.
     </p>
 
     <p>
@@ -99,6 +136,11 @@
       albeit semi transparent. This was an easy fix; just some logic that would render the faces if the neighboring block isn’t opaque or water. 
       Finally, we have transparency!
     </p>
+
+        <td>
+            <img src="./images/night_transparent_and_semitransparent.PNG" align="middle" width="400px"/>
+            <figcaption>Notice how we can see entirely through the water into the distance.</figcaption>
+        </td>
 
     <h4 align="middle">Implementing shader for refraction and reflection</h4>
 
@@ -109,6 +151,35 @@
       fragment_uv coordinates. It then checks whether or not this color is part of the a cloud (which may end up resulting in a masking effect) and then 
       adjusts the diffuse and ambient occlusion accordingly. 
     </p>
+
+    <p>
+      Then, the code checks the uv coordinates of the texture based on fragment_uv and if it falls within the water texture, it applies waves, slight distortions, and the fresnel effect. To create the waves, we were initially going to implement vertex displacement, but since each face only has six vertices, we would have had to completely change the mesh representation. Thus, we decided to simulate water waves by using timers to induce a sliding effect of the texture. It wraps around as it reaches the end of the texture. On top of this, we created a sin() based color pulse based on location to cause the sliding waves to look slightly more realistic and dynamic.
+    </p>
+
+    <p>
+      Lastly, to add refraction properties, we calculated the Fresnel term based on the following equations:
+    </p>
+
+        <td>
+            <img src="./images/fresnel1.PNG" align="middle" width="400px"/>
+            <figcaption>How the reflection and refraction rays are positioned.</figcaption>
+        </td>
+
+        <td>
+            <img src="./images/fresnel2.PNG" align="middle" width="400px"/>
+            <figcaption>How the ratio of refraction coefficients affects the transparency.</figcaption>
+        </td>
+
+        <td>
+            <img src="./images/fresnel3.PNG" align="middle" width="400px"/>
+            <figcaption>Linear Interpolation of lower and upper bounds to get the final transparency value.</figcaption>
+        </td>
+
+    <p>
+      We used the refraction coefficients of water (1.0) and air (1.33) in order to simulate the refractive behavior of light traveling through them. Using dot products, exponential scaling, and linear interpolation (for lower and upper bounds of the effect), we could then set the alpha value of the render to the result of the fresnel effect, causing it to variably be opaque or semi transparent depending on the viewing angle. In addition, the code fetches a part of the sky color from the sky_sampler texture based on the reflection angle calculated in the fresnel code. The refraction angle is used to fetch another color from a different water texture, causing some distortion. Lastly, we mixed the reflected and refracted colors into the final color (after waves) using the Fresnel term and stored that color in gl_FragColor as the final value.
+    </p>
+
+  
 
     <h3 align="middle">Lessons we learned</h3>
 
@@ -121,27 +192,64 @@
     <p>
       A second lesson we learned in our process was that implementing the Fresnel effect, reflection, and texture manipulation / distortion for waves occurred 
       in the OpenGl GLSL files themselves. We learned how to vary texture sample uv coordinates with time to achieve “moving” renders and how using 
-      harmonics can create more dynamic effects. We also learned how much fine tuning needs to go into choosing constants when rending water. 
+      sin() waves can create more dynamic effects. We also learned how much fine tuning needs to go into choosing constants when rending water. 
     </p>
 
     <h3 align="middle">Results</h3>
+      
+        <div align="middle">
+            <table style="width:100%">
+                <tr align="center">
+                    <td>
+                        <img src="./images/day1.PNG" align="middle" width="400px"/>
+                        <figcaption>Water during the daytime! Notice the slight glints on the surface</figcaption>
+                    </td>
+                    <td>
+                        <img src="./images/night1.PNG" align="middle" width="400px"/>
+                        <figcaption>Water during nighttime. The surface reflects the conditions of surrounding light</figcaption>
+                    </td>
+                </tr>
+                <tr align="center">
+                    <td>
+                        <img src="./images/reflection.PNG" align="middle" width="400px"/>
+                        <figcaption>Reflection from above at night. We can see the sky in the surface of the water.</figcaption>
+                    </td>
+                    <td>
+                        <img src="./images/sunset_w_shader.PNG" align="middle" width="400px"/>
+                        <figcaption>Closeup of the water surface</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
 
-    <p>
-      Link to our video/demo: 
-    </p>
-
+      
+      
+    <p>Our project ended up having quite different results than we had initially expected. This stemmed from the need to create transparency from scratch and from the current implementation of the triangle mesh on each block face. As such, the majority of our time was spent working on redesigning the entire pipeline. However, as you can see in the above pictures, we were still able to implement some traditional water shader effects. This project ended up getting us to learn how data and rendering is dealt with in one of our favorite childhood games.</p>
 
     <h3 align="middle">References</h3>
 
-
+    <p>Homework 3 and 4 from CS184</p>
+    <p>https://www.gamedev.net/tutorials/programming/graphics/rendering-water-as-a-post-process-effect-r2642/</p>
+    <p>https://www.gdcvault.com/play/1015309/Water-Technology-of</p>
+    <p>https://www.youtube.com/watch?v=yrFo1_Izlk0</p>
+    <p>https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/</p>
+  
     <h3 align="middle">Contributions</h3>
 
+    <p><b>Dante Hays:</b></p>
+      <p>Worked with Aayush to implement transparency by interfacing with OpenGL and Craft base code. Redesigned data buffer generation and object depth sorting for semi transparency. Implemented waves using timer and sin function based variance in glsl files. Helped create the final webpage.
+      </p>
 
+    <p><b>Aayush Patel:</b></p>
+      <p>Worked with Dante to implement transparency by interfacing with OpenGL and Craft base code. Created new interactions with glsl files to implement shaders. Helped create the final webpage.
+      </p>
 
-    
+    <p><b>Angela Zhang:</b></p>
+      <p>Conducted initial research on fresnel effect and vertex displacement. Helped with some debugging of initial transparency implementation. Helped create the final webpage.</p>
 
-
+    <p><b>Jaewon Oh:</b></p>
+      <p>Implemented fresnel effect in glsl files. Conducted initial research and found Craft. Created slides for presentation.</p>
 
 </body>
 </html>
-
